@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nexora IA — protótipo</title>
+<style>
+:root{color-scheme:dark;--bg:#070b16;--panel:#0e1426;--line:#1f2a48;--tx:#e8edff;--mut:#8b97bd;--cy:#22d3ee;--pu:#a855f7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;display:flex;overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.grad{background:linear-gradient(135deg,var(--cy),var(--pu))}
+aside{width:250px;background:var(--panel);border-right:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:6px;flex-shrink:0;transition:transform .2s}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;margin-bottom:14px}
+.logo i{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:#06101c;font-style:normal;font-weight:800}
+nav button{width:100%;text-align:left;background:none;border:0;padding:11px 12px;border-radius:10px;cursor:pointer;color:var(--mut)}
+nav button.on,nav button:hover{background:#18213b;color:var(--tx)}
+.note{margin-top:auto;font-size:12px;color:var(--mut);border:1px dashed var(--line);border-radius:10px;padding:10px}
+main{flex:1;min-width:0;display:flex;flex-direction:column}
+header{display:none;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+header button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+section{display:none;flex:1;min-height:0;flex-direction:column;padding:18px;gap:12px;overflow:auto}
+section.on{display:flex}
+h1{font-size:26px;margin:0}h2{font-size:20px;margin:0}p{margin:0}
+.sub{color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#141c35;border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;font-size:14px}
+.chip:hover{border-color:var(--cy)}
+#msgs{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;min-height:120px}
+.m{max-width:85%;padding:10px 14px;border-radius:14px;white-space:pre-wrap;word-break:break-word}
+.m.u{align-self:flex-end;background:#1d2a52}
+.m.a{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
+.tag{font-size:11px;color:var(--pu)}
+#msgs{width:100%;max-width:760px;align-self:center}
+.comp{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:12px 12px 8px;max-width:760px;width:100%;align-self:center}
+.comp textarea{width:100%;background:none;border:0;resize:none;outline:none;max-height:140px;padding:4px 6px;min-height:28px}
+.cbar{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.pbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:none;font-size:22px;line-height:1;cursor:pointer}
+.pbtn:hover{border-color:var(--cy)}
+.send{width:36px;height:36px;border-radius:50%;border:0;color:#06101c;font-weight:800;font-size:18px;cursor:pointer}
+.plus{position:relative}
+.pmenu{position:absolute;bottom:44px;left:0;min-width:240px;background:#141c35;border:1px solid var(--line);border-radius:16px;padding:6px;z-index:3}
+.pmenu button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:10px;cursor:pointer}
+.pmenu button:hover{background:#1d2a52}
+.row{display:flex;gap:8px}
+.row input,.row textarea{flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:600;color:#06101c;cursor:pointer}
+.btn.s{background:#18213b;color:var(--tx);border:1px solid var(--line)}
+.split{display:flex;gap:12px;flex:1;min-height:360px}
+.split>*{flex:1;min-width:0}
+iframe{width:100%;height:100%;min-height:340px;border:1px solid var(--line);border-radius:12px;background:#fff}
+#code{width:100%;height:100%;min-height:340px;background:#050810;border:1px solid var(--line);border-radius:12px;padding:12px;font:12px/1.4 ui-monospace,Menlo,monospace;resize:none}
+.stage{flex:1;min-height:300px;border-radius:16px;border:1px solid var(--line);display:grid;place-items:center;padding:24px;text-align:center;background:radial-gradient(circle at 20% 0,#1b1b4a,#0b1020)}
+.stage h2{font-size:clamp(24px,5vw,40px);margin-bottom:12px}
+.stage ul{text-align:left;max-width:520px;margin:0;padding-left:20px;color:var(--mut)}
+.pager{display:flex;align-items:center;gap:10px;justify-content:center}
+#print{display:none}
+@media(max-width:760px){
+aside{position:fixed;z-index:5;top:0;bottom:0;left:0;transform:translateX(-100%);padding-top:calc(16px + env(safe-area-inset-top,0px))}
+aside.open{transform:none}
+header{display:flex}.split{flex-direction:column}}
+@media print{body{display:block;overflow:visible;height:auto}aside,main{display:none}#print{display:block}#print div{page-break-after:always;padding:40px;color:#000;background:#fff}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="logo"><i class="grad">N</i>Nexora IA</div>
+  <nav>
+    <button data-t="chat" class="on">Chat IA</button>
+    <button data-t="site">Criador de sites</button>
+    <button data-t="slides">Criador de slides</button>
+    <button data-t="img">Imagens</button>
+    <button data-t="doc">Documentos</button>
+    <button data-t="about">Status do protótipo</button>
+  </nav>
+  <label class="sub" style="font-size:12px;margin-top:auto" for="mdl">Modelo de IA</label><select id="mdl" style="background:#141c35;border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:6px"><option value="s">Sonnet 5.5 (médio)</option><option value="h">Haiku 5.5 (rápido)</option></select><button class="btn s" id="perm">Ativar permissões</button><div id="pst" class="sub" style="font-size:12px;margin-bottom:8px"></div>
+  <div class="note">Protótipo v2. O chat, os sites e os slides usam um modelo de IA real quando a permissão é concedida; sem ela, caem em modo demonstração.</div>
+</aside>
+<main>
+<header><button id="menu" aria-label="Abrir menu">Menu</button><b>Nexora IA</b></header>
+
+<section id="chat" class="on">
+  <div><h1>Olá! O que vamos criar hoje?</h1><p class="sub">Converse, programe e transforme suas ideias em projetos.</p></div>
+  <div class="chips">
+    <button class="chip" data-go="site">Criar um site</button>
+    <button class="chip" data-go="slides">Criar uma apresentação</button>
+    <button class="chip" data-q="Como você vai funcionar de verdade?">Como você funciona?</button>
+  </div>
+  <div id="msgs" aria-live="polite"></div>
+  <div class="comp">
+    <div id="pv2" style="padding:0 6px 6px"></div><input id="cf" type="file" accept="image/*" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" tabindex="-1"><input id="cc" type="file" accept="image/*" capture="environment" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" tabindex="-1"><textarea id="q" rows="1" placeholder="Como posso ajudar você hoje? Você também pode colar uma imagem aqui." aria-label="Mensagem"></textarea>
+    <div class="cbar">
+      <div class="plus">
+        <button id="pb" class="pbtn" aria-label="Mais opções" aria-expanded="false">+</button>
+        <div id="pm" class="pmenu" hidden>
+          <button id="ap">Enviar foto para a IA</button>
+          <button id="ac">Tirar foto com a câmera</button>
+          <button data-go="site">Criar um site</button>
+          <button data-go="slides">Criar uma apresentação</button>
+          <button data-go="img">Criar ou editar imagem</button>
+          <button data-go="doc">Escrever um documento</button>
+        </div>
+      </div>
+      <button class="send grad" id="send" aria-label="Enviar mensagem">↑</button>
+    </div>
+  </div>
+</section>
+
+<section id="site">
+  <h2>Criador de sites</h2>
+  <p class="sub">Descreva o site. Com a IA liberada, o modelo escreve o site. Sem ela, usa modelos prontos (loja, portfólio, jogo).</p>
+  <div class="row"><input id="sp" aria-label="Descrição do site" value="Crie um jogo de moedas para celular"><button class="btn grad" id="gen">Gerar</button></div>
+  <div class="row"><button class="btn s" id="tp">Prévia</button><button class="btn s" id="tc">Código</button><button class="btn s" id="up">Atualizar prévia</button><button class="btn s" id="ex">Exportar .html</button></div>
+  <div class="split"><iframe id="pv" title="Prévia do site" sandbox="allow-scripts"></iframe><textarea id="code" aria-label="Código do site" spellcheck="false" style="display:none"></textarea></div>
+</section>
+
+<section id="slides">
+  <h2>Criador de slides</h2>
+  <p class="sub">Informe o tema. Com a IA liberada, o modelo escreve os slides. Sem ela, usa uma estrutura padrão. Você pode editar o texto.</p>
+  <div class="row"><input id="tm" aria-label="Tema" value="Energia solar"><button class="btn grad" id="gs">Gerar slides</button></div>
+  <div class="stage" id="stg"><p class="sub">Gere uma apresentação para ver os slides.</p></div>
+  <div class="pager"><button class="btn s" id="pr">Anterior</button><span id="pg" class="sub">0/0</span><button class="btn s" id="nx">Próximo</button><button class="btn s" id="pdf">Salvar PDF</button></div>
+</section>
+
+<section id="img">
+  <h2>Imagens</h2>
+  <p class="sub">Criar: o modelo desenha uma ilustração em SVG (não gera fotos realistas). Editar: envie uma foto e ajuste brilho, cor e rotação.</p>
+  <div class="row"><input id="ip" aria-label="Descrição da imagem" value="Um planeta com anel e estrelas, estilo neon"><button class="btn grad" id="ig">Criar imagem</button></div>
+  <div class="row"><input id="if" type="file" accept="image/*" aria-label="Enviar foto para editar" style="max-width:100%;color:var(--mut)"><button class="btn s" id="isv">Salvar imagem</button></div>
+  <div class="stage" id="is"><p class="sub">Crie uma imagem ou envie uma foto.</p></div>
+  <div id="ctl" style="display:none">
+   <label>Brilho <input type="range" id="br" min="40" max="180" value="100"></label>
+   <label>Contraste <input type="range" id="co" min="40" max="180" value="100"></label>
+   <label>Cor <input type="range" id="sa" min="0" max="250" value="100"></label>
+   <label>Preto e branco <input type="range" id="gr" min="0" max="100" value="0"></label>
+   <button class="btn s" id="rt">Girar 90°</button>
+  </div>
+</section>
+
+<section id="doc">
+  <h2>Documentos</h2>
+  <p class="sub">Descreva o documento (carta, relatório, currículo, resumo). O modelo escreve e você edita antes de salvar.</p>
+  <div class="row"><input id="dp" aria-label="Descrição do documento" value="Carta de apresentação para vaga de atendente"><button class="btn grad" id="dg">Escrever</button></div>
+  <textarea id="dt" aria-label="Texto do documento" style="flex:1;min-height:300px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px"></textarea>
+  <div class="row"><button class="btn s" id="dh">Salvar .html</button><button class="btn s" id="dx">Salvar .txt</button><button class="btn s" id="dpdf">Salvar PDF</button></div>
+</section>
+
+<section id="about">
+  <h2>Status do protótipo</h2>
+  <p><b>Funciona agora:</b> menu, chat de demonstração, gerador de sites por modelos com prévia isolada, edição de código e exportação, gerador de slides com navegação e impressão para PDF.</p>
+  <p><b>IA real:</b> o chat, os sites e os slides usam o Claude pela plataforma do artefato, com a sua permissão. Não é um backend próprio da Nexora, e depende de você abrir a página no claude.ai, e de limites de uso. Sem permissão, entra o modo demonstração.</p>
+  <p><b>Falta para a versão definitiva:</b> modelo de IA real via servidor, histórico salvo, roteamento entre modelos, envio de arquivos e pesquisa na internet.</p>
+</section>
+</main>
+<div id="print"></div>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function tab(t){$$('section').forEach(s=>s.classList.toggle('on',s.id===t));$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#side').classList.remove('open')}
+$$('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.t));
+$$('[data-go]').forEach(b=>b.onclick=()=>tab(b.dataset.go));
+$('#menu').onclick=()=>$('#side').classList.toggle('open');
+function add(c,t,tag){const d=document.createElement('div');d.className='m '+c;if(tag){const g=document.createElement('div');g.className='tag';g.textContent=tag;d.appendChild(g)}d.appendChild(document.createTextNode(t));$('#msgs').appendChild(d);$('#msgs').scrollTop=1e9}
+let SM=null,H=[];
+if(window.claude&&claude.use)claude.use('sample').then(s=>{SM=wrap(s)}).catch(()=>{});
+const SYS='Você é a Nexora IA, uma assistente multifuncional que ajuda a conversar, programar e criar sites e apresentações. Responda em português do Brasil, de forma clara e direta, sem inventar que executou código ou pesquisou na internet.';
+let PIC=null;function clearPic(){PIC=null;$('#pv2').replaceChildren()}
+function wrap(s){const o=()=>$('#mdl').value==='h'?{model:'claude-haiku-5-5'}:{model:'claude-sonnet-5-5',effort:'medium'};const f=(i,p)=>s(i,{...o(),...(p||{})});f.json=(i,p)=>s.json(i,{...o(),...(p||{})});return f}
+async function send(txt){txt=(txt||$('#q').value).trim();if(!txt&&!PIC)return;if(!txt)txt='Descreva esta imagem.';$('#q').value='';add('u',(PIC?'📷 ':'')+txt);
+ if(!SM)return demo(txt);
+ const d=document.createElement('div');d.className='m a';d.textContent='Pensando...';$('#msgs').appendChild(d);$('#msgs').scrollTop=1e9;
+ const ctx=H.slice(-10).map(x=>(x.role==='user'?'Usuário: ':'Nexora: ')+x.content).join('\n');
+ try{const r=await SM(SYS+'\n\nConversa até agora:\n'+ctx+'\n\nUsuário: '+txt+'\n\nResponda como Nexora.',{cache:false,...(PIC?{images:[PIC]}:{}),onText:o=>{d.textContent=o.text;$('#msgs').scrollTop=1e9}});d.textContent=r.text;clearPic();H.push({role:'user',content:txt},{role:'assistant',content:r.text})}
+ catch(e){d.textContent='Não consegui falar com o modelo ('+(e.code||'erro')+'). '+(e.code==='not_granted'?'A permissão foi negada.':e.code==='rate_limited'?'Muitas mensagens seguidas; espere um pouco.':'Tente de novo.')}}
+function demo(txt){
+ const l=txt.toLowerCase();let r='Esta é uma resposta de demonstração. Quando a Nexora estiver ligada a um modelo real, você receberá uma resposta gerada para este pedido.';
+ if(/site|página|loja|jogo/.test(l))r='Para sites, use a aba Criador de sites. Ela já gera, mostra a prévia e exporta o arquivo.';
+ else if(/slide|apresenta/.test(l))r='Para apresentações, use a aba Criador de slides.';
+ else if(/funcion|como/.test(l))r='Hoje sou só a interface. Na versão definitiva, um servidor enviará suas mensagens a um modelo de IA autorizado, sem expor chaves no navegador.';
+ setTimeout(()=>add('a',r,'Demonstração, sem IA real'),350)}
+const go=()=>{send();$('#q').style.height='auto'};
+$('#send').onclick=go;
+$('#q').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}};
+$('#q').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,140)+'px'};
+$('#pb').onclick=e=>{e.stopPropagation();const h=$('#pm').hidden=!$('#pm').hidden;$('#pb').setAttribute('aria-expanded',String(!h))};
+document.addEventListener('click',()=>{$('#pm').hidden=true;$('#pb').setAttribute('aria-expanded','false')});
+$$('[data-q]').forEach(b=>b.onclick=()=>send(b.dataset.q));
+add('a','Oi! Eu sou a Nexora IA. Ao enviar a primeira mensagem, o navegador pede permissão para usar o modelo de IA. Sem ela, respondo só com frases de demonstração.','Nexora IA');
+
+// SITES
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function build(p){const t=esc(p.slice(0,60)),l=p.toLowerCase();
+const base=b=>`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${t}</title><style>body{margin:0;font-family:system-ui,sans-serif;background:#0b1020;color:#eef;text-align:center;padding:24px}h1{background:linear-gradient(135deg,#22d3ee,#a855f7);-webkit-background-clip:text;color:transparent}button{background:#22d3ee;border:0;border-radius:12px;padding:14px 22px;font-size:18px;font-weight:700}.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;max-width:640px;margin:20px auto}.c{background:#141c35;border-radius:14px;padding:18px}</style></head><body>${b}</body></html>`;
+if(/jogo|game/.test(l))return base(`<h1>${t}</h1><p>Toque na moeda!</p><p style="font-size:48px" id="n">0</p><button id="b">Coletar moeda</button><p id="m"></p><script>let n=0,v=1;b.onclick=()=>{n+=v;document.getElementById('n').textContent=n;if(n>=10&&v==1){v=2;m.textContent='Bônus: cada toque vale 2'}}<\/script>`);
+if(/loja|produto|vend/.test(l))return base(`<h1>${t}</h1><div class="g"><div class="c"><b>Produto 1</b><p>R$ 49,90</p><button>Comprar</button></div><div class="c"><b>Produto 2</b><p>R$ 79,90</p><button>Comprar</button></div><div class="c"><b>Produto 3</b><p>R$ 129,90</p><button>Comprar</button></div></div>`);
+if(/portf|profission/.test(l))return base(`<h1>${t}</h1><p>Olá, eu sou [seu nome]. Faço projetos criativos.</p><div class="g"><div class="c">Projeto A</div><div class="c">Projeto B</div><div class="c">Projeto C</div></div><button>Fale comigo</button>`);
+return base(`<h1>${t}</h1><p>Descrição curta do que você oferece.</p><div class="g"><div class="c">Benefício 1</div><div class="c">Benefício 2</div><div class="c">Benefício 3</div></div><button>Começar agora</button>`)}
+function show(){$('#pv').srcdoc=$('#code').value}
+function view(c){$('#pv').style.display=c?'none':'block';$('#code').style.display=c?'block':'none'}
+$('#gen').onclick=async()=>{const p=$('#sp').value||'Meu site';
+ if(!SM){$('#code').value=build(p);show();view(false);return}
+ const b=$('#gen');b.disabled=true;b.textContent='Gerando...';
+ try{const r=await SM('Crie um site completo em um único arquivo HTML (CSS e JS embutidos, sem recursos externos, responsivo para celular, tema escuro) para este pedido: '+p+'\n\nResponda somente com o código HTML, começando em <!DOCTYPE html>, sem markdown.',{cache:false});
+ $('#code').value=r.text.replace(/```html|```/g,'').trim()}catch(e){$('#code').value=build(p)}
+ b.disabled=false;b.textContent='Gerar';show();view(false)};
+$('#tp').onclick=()=>view(false);$('#tc').onclick=()=>view(true);
+$('#up').onclick=()=>{show();view(false)};
+$('#ex').onclick=async()=>{const dl=window.claude&&claude.use?await claude.use('downloads'):null;
+ if(dl){try{await dl.save({filename:'meu-site.html',data:new Blob([$('#code').value],{type:'text/html'})})}catch(e){}return}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#code').value],{type:'text/html'}));a.download='meu-site.html';a.click()};
+$('#gen').click();
+
+// SLIDES
+let S=[],i=0;
+function gen(tm){return[
+{t:tm,b:['Apresentação gerada pela Nexora IA (modelo de demonstração)']},
+{t:'Introdução',b:['Por que '+tm+' importa','O que vamos ver hoje']},
+{t:'O que é '+tm,b:['Definição simples','Origem e contexto']},
+{t:'Como funciona',b:['Principais etapas','Exemplo do dia a dia']},
+{t:'Vantagens',b:['Ponto forte 1','Ponto forte 2','Ponto forte 3']},
+{t:'Limitações',b:['Desafio 1','Desafio 2']},
+{t:'Conclusão',b:['Resumo dos pontos principais','Próximos passos']}]}
+function draw(){const s=S[i];if(!s)return;const st=$('#stg');st.innerHTML='';const d=document.createElement('div');
+const h=document.createElement('h2');h.contentEditable=true;h.textContent=s.t;h.oninput=()=>{s.t=h.textContent};d.appendChild(h);
+const u=document.createElement('ul');u.contentEditable=true;s.b.forEach(x=>{const li=document.createElement('li');li.textContent=x;u.appendChild(li)});u.oninput=()=>{s.b=[...u.children].map(l=>l.textContent)};d.appendChild(u);st.appendChild(d);
+$('#pg').textCo
